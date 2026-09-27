@@ -236,7 +236,7 @@ button, input, textarea {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
-@media (min-width: 768px) {
+@media (min-width: 992px) {
   .desktop-nav-links {
     display: flex;
   }
@@ -350,7 +350,7 @@ button, input, textarea {
   min-height: 44px;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 992px) {
   .mobile-hamburger-btn {
     display: none;
   }
@@ -375,9 +375,17 @@ button, input, textarea {
 }
 
 .mobile-drawer.open {
-  max-height: 520px;
+  max-height: calc(100vh - 70px);
+  overflow-y: auto;
   opacity: 1;
   pointer-events: auto;
+}
+
+@media (min-width: 992px) {
+  .mobile-drawer,
+  .nav-overlay {
+    display: none !important;
+  }
 }
 
 .mobile-drawer-content {

@@ -401,35 +401,100 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- 9. Contact Form Submission Handling ---
+  // --- 9. Contact Form Submission Handling (FormSubmit AJAX Integration) ---
   const contactForm = document.getElementById('contact-form');
   const formStatusSuccess = document.getElementById('form-status-success');
   const formStatusError = document.getElementById('form-status-error');
   const submitBtn = document.getElementById('submit-btn');
 
   if (contactForm) {
-    contactForm.addEventListener('submit', (e) => {
+    contactForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+
+      const formData = new FormData(contactForm);
+      const name = formData.get('name')?.toString().trim() || '';
+      const email = formData.get('email')?.toString().trim() || '';
+      const subject = formData.get('subject')?.toString().trim() || 'Portfolio Direct Message';
+      const message = formData.get('message')?.toString().trim() || '';
+
+      if (!name || !email || !message) {
+        if (formStatusError) {
+          formStatusError.innerHTML = `
+            <svg class="w-4 h-4 text-red-600 dark:text-red-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            <span>Please fill out all required fields (*).</span>
+          `;
+          formStatusError.classList.remove('hidden');
+        }
+        return;
+      }
 
       if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<span>Sending message...</span>';
       }
 
-      setTimeout(() => {
+      if (formStatusSuccess) formStatusSuccess.classList.add('hidden');
+      if (formStatusError) formStatusError.classList.add('hidden');
+
+      const RECIPIENT_EMAIL = 'samirchhetri075@gmail.com';
+
+      try {
+        const response = await fetch(`https://formsubmit.co/ajax/${RECIPIENT_EMAIL}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            name: name,
+            email: email,
+            _subject: `[Portfolio Message] ${subject} - ${name}`,
+            _replyto: email,
+            _template: 'table',
+            _captcha: 'false',
+            message: message
+          })
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (response.ok && (data.success === 'true' || data.success === true)) {
+          if (formStatusSuccess) {
+            formStatusSuccess.innerHTML = `
+              <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+              <span>Thank you, ${name}! Your message has been sent successfully to Samir Chhetri (${RECIPIENT_EMAIL}). I will get back to you shortly.</span>
+            `;
+            formStatusSuccess.classList.remove('hidden');
+          }
+          contactForm.reset();
+        } else if (data.message && data.message.includes('Activation')) {
+          if (formStatusSuccess) {
+            formStatusSuccess.innerHTML = `
+              <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+              <span>First-time setup: Activation email sent to <strong>${RECIPIENT_EMAIL}</strong>. Click "Activate Form" in your inbox once to complete setup!</span>
+            `;
+            formStatusSuccess.classList.remove('hidden');
+          }
+          contactForm.reset();
+        } else {
+          throw new Error(data.message || 'Form submission failed');
+        }
+      } catch (err) {
+        console.error('Contact form submission error:', err);
+        const mailtoUrl = `mailto:${RECIPIENT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\n${message}`)}`;
+        if (formStatusError) {
+          formStatusError.innerHTML = `
+            <svg class="w-4 h-4 text-red-600 dark:text-red-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            <span>Message delivery failed. <a href="${mailtoUrl}" class="underline font-bold hover:text-red-500">Click here to send directly via Email app</a>.</span>
+          `;
+          formStatusError.classList.remove('hidden');
+        }
+      } finally {
         if (submitBtn) {
           submitBtn.disabled = false;
           submitBtn.innerHTML = '<span>contact.send()</span> <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>';
         }
-
-        if (formStatusSuccess) formStatusSuccess.classList.remove('hidden');
-        if (formStatusError) formStatusError.classList.add('hidden');
-        contactForm.reset();
-
-        setTimeout(() => {
-          if (formStatusSuccess) formStatusSuccess.classList.add('hidden');
-        }, 5000);
-      }, 700);
+      }
     });
   }
 
