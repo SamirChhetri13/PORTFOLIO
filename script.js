@@ -442,10 +442,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (formStatusSuccess) formStatusSuccess.classList.add('hidden');
       if (formStatusError) formStatusError.classList.add('hidden');
 
+      const FORMSUBMIT_TOKEN = 'bef5a61167f8a3e021eb1be03f6c9c9b';
       const RECIPIENT_EMAIL = 'samirchhetri075@gmail.com';
 
       try {
-        const response = await fetch(`https://formsubmit.co/ajax/${RECIPIENT_EMAIL}`, {
+        const response = await fetch(`https://formsubmit.co/ajax/${FORMSUBMIT_TOKEN}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
