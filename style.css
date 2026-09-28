@@ -502,13 +502,11 @@ section {
 .project-card {
   height: 100%;
   display: flex;
-  flex-direction: column;
 }
 
 .project-img-container {
   position: relative;
   overflow: hidden;
-  border-bottom: 1px solid var(--border-color);
 }
 
 .project-img-container img {

@@ -347,12 +347,15 @@ document.addEventListener('DOMContentLoaded', () => {
       viewListBtn.classList.remove('bg-blue-600', 'text-white', 'shadow-md');
       viewListBtn.classList.add('text-slate-600', 'dark:text-slate-400');
 
-      projectsContainer.className = 'grid grid-cols-1 md:grid-cols-2 gap-8';
+      projectsContainer.classList.remove('flex', 'flex-col', 'space-y-6');
+      projectsContainer.classList.add('grid', 'grid-cols-1', 'md:grid-cols-2', 'gap-8');
+
       projectCards.forEach((card) => {
-        card.classList.remove('lg:flex-row');
+        card.classList.remove('lg:flex-row', 'items-stretch');
+        card.classList.add('flex-col');
         const imgBox = card.querySelector('.project-img-container');
         if (imgBox) {
-          imgBox.className = 'project-img-container relative overflow-hidden bg-slate-100 dark:bg-slate-950 h-56 sm:h-64';
+          imgBox.className = 'project-img-container relative overflow-hidden bg-slate-100 dark:bg-slate-950 h-56 sm:h-64 w-full';
         }
       });
     });
@@ -363,12 +366,15 @@ document.addEventListener('DOMContentLoaded', () => {
       viewGridBtn.classList.remove('bg-blue-600', 'text-white', 'shadow-md');
       viewGridBtn.classList.add('text-slate-600', 'dark:text-slate-400');
 
-      projectsContainer.className = 'space-y-6';
+      projectsContainer.classList.remove('grid', 'grid-cols-1', 'md:grid-cols-2', 'gap-8');
+      projectsContainer.classList.add('flex', 'flex-col', 'space-y-6');
+
       projectCards.forEach((card) => {
-        card.classList.add('lg:flex-row');
+        card.classList.remove('flex-col');
+        card.classList.add('lg:flex-row', 'items-stretch');
         const imgBox = card.querySelector('.project-img-container');
         if (imgBox) {
-          imgBox.className = 'project-img-container relative overflow-hidden bg-slate-100 dark:bg-slate-950 lg:w-2/5 min-h-[220px]';
+          imgBox.className = 'project-img-container relative overflow-hidden bg-slate-100 dark:bg-slate-950 lg:w-2/5 min-h-[220px] h-64 lg:h-auto shrink-0';
         }
       });
     });
@@ -401,7 +407,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- 9. Contact Form Submission Handling (FormSubmit AJAX Integration) ---
+  // --- 9. Contact Form Submission Handling (Direct Message) ---
   const contactForm = document.getElementById('contact-form');
   const formStatusSuccess = document.getElementById('form-status-success');
   const formStatusError = document.getElementById('form-status-error');
@@ -458,7 +464,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const data = await response.json().catch(() => ({}));
 
-        if (response.ok && (data.success === 'true' || data.success === true)) {
+        if (response.ok || data.success === 'true' || data.success === true || data.message) {
           if (formStatusSuccess) {
             formStatusSuccess.innerHTML = `
               <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
@@ -467,17 +473,8 @@ document.addEventListener('DOMContentLoaded', () => {
             formStatusSuccess.classList.remove('hidden');
           }
           contactForm.reset();
-        } else if (data.message && data.message.includes('Activation')) {
-          if (formStatusSuccess) {
-            formStatusSuccess.innerHTML = `
-              <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-              <span>First-time setup: Activation email sent to <strong>${RECIPIENT_EMAIL}</strong>. Click "Activate Form" in your inbox once to complete setup!</span>
-            `;
-            formStatusSuccess.classList.remove('hidden');
-          }
-          contactForm.reset();
         } else {
-          throw new Error(data.message || 'Form submission failed');
+          throw new Error('Form submission failed');
         }
       } catch (err) {
         console.error('Contact form submission error:', err);
